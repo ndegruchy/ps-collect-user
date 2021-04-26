@@ -37,7 +37,7 @@ $CurrentDate                = ( Get-Date -F yyyy-MM-dd )
 $ScriptLog                  = "${CurrentDate}-CollectionLog-${ENV:COMPUTERNAME}-${username}.log"
 $ConfigFolder               = "Config"
 $WorkingDirectory           = "${ENV:OneDrive}\${ConfigFolder}\"
-$InstalledPrograms          = ( Get-WMIObject -Query "SELECT * FROM Win32_Product" ) | Select-Object Name, Version
+$InstalledPrograms          = ( Get-CimInstance -Query "SELECT * FROM Win32_Product" ) | Select-Object Name, Version
 $Printers                   = ( Get-Printer )
 $MappedDrives               = ( Get-SmbMapping )
 $ProxySettings              = ( Get-ItemProperty -Path "Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" )
@@ -47,7 +47,8 @@ $BogusPrinters              = @(
     "Microsoft Print to PDF",
     "Fax",
     "Send To OneNote 2016",
-    "OneNote (Desktop)"
+    "OneNote (Desktop)",
+    "OneNote for Windows 10"
 )
 $FileList                   = @(
     "${ENV:LOCALAPPDATA}\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite"
@@ -135,7 +136,6 @@ function Get-OutlookPSTs
 
     try
     {
-
         if( $null -ne $Outlook )
         {
             foreach ( $store in $Outlook.Session.Stores )
@@ -167,22 +167,32 @@ function Get-UserPrinters
     #>
     param()
     $count = 0
-    foreach ( $printer in $Printers )
+
+    if ( $Printers.length -gt 0 )
     {
-        if ( $printer.Name -in $BogusPrinters )
+        foreach ( $printer in $Printers )
         {
-            continue
+            if ( $printer.Name -in $BogusPrinters )
+            {
+                continue
+            }
+            else
+            {
+                Write-Log "Info" "Printer: `"$($printer.Name)`", on $($printer.ComputerName) port $($printer.PortName) using $($printer.DriverName)"
+                $count = $count + 1
+            }
         }
-        else
+        if ($count -eq 0)
         {
-            Write-Log "Info" "Printer: `"$($printer.Name)`", on $($printer.ComputerName) port $($printer.PortName) using $($printer.DriverName)"
-            $count = $count + 1
+            Write-Log "Info" "Printer: No user printers found"
         }
     }
-    if ($count -eq 0)
+    else
     {
-        Write-Log "Info" "Printer: No user printers found"
+        Write-Log "Info" "Printer: No connected printers."
     }
+
+
 }
 
 function Get-UserMappedDrives
