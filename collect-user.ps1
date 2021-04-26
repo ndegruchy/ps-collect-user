@@ -37,7 +37,7 @@ $CurrentDate                = ( Get-Date -F yyyy-MM-dd )
 $ScriptLog                  = "${CurrentDate}-CollectionLog-${ENV:COMPUTERNAME}-${username}.log"
 $ConfigFolder               = "Config"
 $WorkingDirectory           = "${ENV:OneDrive}\${ConfigFolder}\"
-$InstalledPrograms          = ( Get-WMIObject -Query "SELECT * FROM Win32_Product" ) | Select-Object Name, Version
+$InstalledPrograms          = ( Get-CimInstance -Query "SELECT * FROM Win32_Product" ) | Select-Object Name, Version
 $Printers                   = ( Get-Printer )
 $MappedDrives               = ( Get-SmbMapping )
 $ProxySettings              = ( Get-ItemProperty -Path "Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" )
@@ -47,7 +47,8 @@ $BogusPrinters              = @(
     "Microsoft Print to PDF",
     "Fax",
     "Send To OneNote 2016",
-    "OneNote (Desktop)"
+    "OneNote (Desktop)",
+    "OneNote for Windows 10"
 )
 $FileList                   = @(
     "${ENV:LOCALAPPDATA}\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite"
