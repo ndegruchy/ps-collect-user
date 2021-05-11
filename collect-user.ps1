@@ -345,4 +345,4 @@ Get-UserMiscFiles
 Write-Progress -Activity "Collecting User Custom Information" -Status "All set!" -PercentComplete 100 -Completed
 
 Write-Log "Info" "Complete!"
-Write-Host "User information collected to: ${WorkingDirectory}${ScriptLog}"
+Write-Output "User information collected to: ${WorkingDirectory}${ScriptLog}"
